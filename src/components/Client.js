@@ -120,7 +120,10 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App-intro">
+      <div className="client">
+        <div style={{position: 'absolute', top: 0, left: 10 }}>
+          <p>{ this.props.name }</p>
+        </div>
         { this.state.error && <ErrorBox message={this.state.error} /> }
         <h3>Server connexion</h3>
         <div style={{display: 'flex', flexDirection: 'row'}}>
