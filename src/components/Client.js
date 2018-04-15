@@ -26,6 +26,44 @@ const styles = {
     justifyContent: 'center',
     width: '60%',
   },
+  clientName: {
+    position: 'absolute',
+    top: 0,
+    left: 10,
+  },
+  closingCross: {
+    position: 'absolute',
+    top: 5,
+    right: 10,
+    color: 'rgba(0,0,0,0.4)',
+    cursor: 'pointer',
+  },
+  connexionFormContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  jsonConnexionOption: {
+    textAlign: 'left',
+    width: 300,
+    minHeight: 100,
+    overflow:'hidden',
+  },
+  roomInfoContainer: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    marginTop: 50,
+    width: '60%'
+  },
+  roomState: {
+    textAlign: 'left',
+    width: 400,
+    minHeight: 100,
+  },
+  jsonMessage: {
+    textAlign: 'left',
+    width: 300,
+    minHeight: 100,
+  },
 };
 
 class App extends Component {
@@ -121,19 +159,18 @@ class App extends Component {
   render() {
     return (
       <div className="client">
-        <div style={{position: 'absolute', top: 0, left: 10 }}>
+        <div style={styles.clientName}>
           <p>{ this.props.client.name }</p>
         </div>
         <div
-          style={{position: 'absolute', top: 5, right: 10, color: 'rgba(0,0,0,0.4)', cursor: 'pointer'}}
+          style={styles.closingCross}
           onClick={this.props.onRemove(this.props.client.id)}
-
         >
           X
         </div>
         { this.state.error && <ErrorBox message={this.state.error} /> }
         <h3>Server connexion</h3>
-        <div style={{display: 'flex', flexDirection: 'row'}}>
+        <div style={styles.connexionFormContainer}>
           <form style={styles.form}>
             <TextField
               id="uri"
@@ -156,7 +193,7 @@ class App extends Component {
               onEdit={this.updateJsonInput('jsonOption')}
               onDelete={this.updateJsonInput('jsonOption')}
               onAdd={this.updateJsonInput('jsonOption')}
-              style={{textAlign: 'left', width: 300, minHeight: 100,overflow:'hidden'}}
+              style={styles.jsonConnexionOption}
             />
             <Button variant="raised" color="primary" style={styles.button} onClick={this.handleSubmit}>
               Connect to room
@@ -167,14 +204,14 @@ class App extends Component {
             reset={this.resetConnection}
           />
         </div>
-        <div style={{display: 'flex', justifyContent: 'space-around', marginTop: 50, width: '60%'}}>
+        <div style={styles.roomInfoContainer}>
           <div>
             <h3>Room state:</h3>
             <ReactJson
               name={false}
               src={this.state.roomState}
               theme="solarized"
-              style={{textAlign: 'left', width: 400, minHeight: 100}}
+              style={styles.roomState}
             />
           </div>
           <form>
@@ -183,7 +220,7 @@ class App extends Component {
               onEdit={this.updateJsonInput('message')}
               onDelete={this.updateJsonInput('message')}
               onAdd={this.updateJsonInput('message')}
-              style={{textAlign: 'left', width: 300, minHeight: 100}}
+              style={styles.jsonMessage}
             />
             <Button variant="raised" color="primary" style={styles.button} onClick={this.submitMessage}>
               Send message
@@ -191,7 +228,7 @@ class App extends Component {
             <h4>Received Message</h4>
             <ReactJson src={this.state.receivedMessage}
               name={'receivedMessage'}
-              style={{textAlign: 'left', width: 300, minHeight: 100}}
+              style={styles.jsonMessage}
               theme="solarized"
             />
           </form>
