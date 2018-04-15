@@ -122,7 +122,14 @@ class App extends Component {
     return (
       <div className="client">
         <div style={{position: 'absolute', top: 0, left: 10 }}>
-          <p>{ this.props.name }</p>
+          <p>{ this.props.client.name }</p>
+        </div>
+        <div
+          style={{position: 'absolute', top: 5, right: 10, color: 'rgba(0,0,0,0.4)', cursor: 'pointer'}}
+          onClick={this.props.onRemove(this.props.client.id)}
+
+        >
+          X
         </div>
         { this.state.error && <ErrorBox message={this.state.error} /> }
         <h3>Server connexion</h3>

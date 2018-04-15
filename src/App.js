@@ -3,6 +3,7 @@ import Button from 'material-ui/Button';
 import AddIcon from '@material-ui/icons/Add';
 
 import Client from './components/Client';
+import { ID } from './services/utils';
 
 import './App.css';
 
@@ -14,18 +15,29 @@ const styles = {
   },
 }
 
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      clients: ['Client 1'],
+      clients: [
+        {
+          name: 'Client 1',
+          id: ID(),
+        }
+      ],
     };
 
     this.addClient = this.addClient.bind(this);
   }
 
   addClient() {
-    this.setState({clients: [ ...this.state.clients, 'New client']});
+    this.setState({clients: [ ...this.state.clients, {name :'New client', id:ID()}]});
+  }
+  removeClient = id => () => {
+    this.setState({
+      clients: this.state.clients.filter((client, i) => client.id !== id)
+    });
   }
 
   render() {
@@ -34,7 +46,9 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Colyseus Room Client</h1>
         </header>
-        {this.state.clients.map((client, index) => <Client name={client} key={index} />)}
+        {this.state.clients.map((client, index) =>
+          <Client client={client} key={client.id} onRemove={this.removeClient}/>
+        )}
         <Button
           variant="fab"
           color="primary"
