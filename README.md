@@ -1,5 +1,5 @@
 # Colyseus Room Client
-A colyseus js room client developed in React
+A [colyseus](https://github.com/gamestdio/colyseus/) js room client developed in React
 
 ## Set up :
 Install node modules :
