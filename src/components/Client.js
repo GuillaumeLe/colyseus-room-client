@@ -5,6 +5,7 @@ import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 
 import ConnexionStatus from './ConnexionStatus';
+import ErrorBox from './ErrorBox'
 
 import '../App.css';
 
@@ -39,6 +40,7 @@ class App extends Component {
       client: null,
       room: null,
       receivedMessage: {},
+      error: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -46,6 +48,8 @@ class App extends Component {
     this.updateRoomState = this.updateRoomState.bind(this);
     this.submitMessage = this.submitMessage.bind(this);
     this.updateReceivedMessage = this.updateReceivedMessage.bind(this);
+    this.onClientError = this.onClientError.bind(this);
+    this.resetConnection = this.resetConnection.bind(this);
 
   }
 
@@ -74,14 +78,26 @@ class App extends Component {
         }
   }
 
+  onClientClose() {
+    console.log("connection has been closed");
+  }
+
+  onClientError(err) {
+    console.log("Client error :", err);
+    this.state.client.close();
+    this.setState({ error: 'Client error :'+err,  client: null, room: null });
+  }
+
   handleSubmit(event) {
     event.preventDefault();
     event.stopPropagation();
     try {
-      this.setState({client: new Client(this.state.uri)}, () => {
+      this.setState({client: new Client(this.state.uri), error: null }, () => {
         this.setState({room: this.state.client.join(this.state.roomName, this.state.jsonOption)}, () => {
           this.state.room.onStateChange.add(this.updateRoomState);
           this.state.room.onMessage.add(this.updateReceivedMessage);
+          this.state.client.onClose.add(this.onClientClose);
+          this.state.client.onError.add(this.onClientError);
         });
       });
     } catch (err) {
@@ -93,9 +109,19 @@ class App extends Component {
     this.setState({[field]: update.updated_src})
   }
 
+  resetConnection() {
+    this.state.client.close();
+    this.setState({
+      client: null,
+      room: null,
+      roomState: {},
+    })
+  }
+
   render() {
     return (
       <div className="App-intro">
+        { this.state.error && <ErrorBox message={this.state.error} /> }
         <h3>Server connexion</h3>
         <div style={{display: 'flex', flexDirection: 'row'}}>
           <form style={styles.form}>
@@ -128,11 +154,7 @@ class App extends Component {
           </form>
           <ConnexionStatus
             client={this.state.client}
-            reset={() => {this.setState({
-              client: null,
-              room: null,
-              roomState: {},
-            })}}
+            reset={this.resetConnection}
           />
         </div>
         <div style={{display: 'flex', justifyContent: 'space-around', marginTop: 50, width: '60%'}}>
