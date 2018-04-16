@@ -1,46 +1,84 @@
-import React, { Component } from 'react';
-import { Client } from 'colyseus.js';
-import ReactJson from 'react-json-view';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
+import React, { Component } from "react";
+import { Client } from "colyseus.js";
+import ReactJson from "react-json-view";
+import TextField from "material-ui/TextField";
+import Button from "material-ui/Button";
 
-import ConnexionStatus from './ConnexionStatus';
-import ErrorBox from './ErrorBox'
+import ConnexionStatus from "./ConnexionStatus";
+import ErrorBox from "./ErrorBox";
 
-import '../App.css';
+import "../App.css";
 
 const styles = {
   textField: {
     marginLeft: 5,
     marginRight: 5,
-    width: 200,
+    width: 200
   },
   button: {
-    height: 50,
+    height: 50
   },
   form: {
     flex: 3,
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '60%',
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "60%"
   },
+  clientName: {
+    position: "absolute",
+    top: 0,
+    left: 10
+  },
+  closingCross: {
+    position: "absolute",
+    top: 5,
+    right: 10,
+    color: "rgba(0,0,0,0.4)",
+    cursor: "pointer"
+  },
+  connexionFormContainer: {
+    display: "flex",
+    flexDirection: "row"
+  },
+  jsonConnexionOption: {
+    textAlign: "left",
+    width: 300,
+    minHeight: 100,
+    overflow: "hidden"
+  },
+  roomInfoContainer: {
+    display: "flex",
+    justifyContent: "space-around",
+    marginTop: 50,
+    width: "60%"
+  },
+  roomState: {
+    textAlign: "left",
+    width: 400,
+    minHeight: 100
+  },
+  jsonMessage: {
+    textAlign: "left",
+    width: 300,
+    minHeight: 100
+  }
 };
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      uri: '',
-      roomName: '',
+      uri: "",
+      roomName: "",
       jsonOption: {},
       message: {},
       roomState: {},
       client: null,
       room: null,
       receivedMessage: {},
-      error: null,
+      error: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -50,12 +88,11 @@ class App extends Component {
     this.updateReceivedMessage = this.updateReceivedMessage.bind(this);
     this.onClientError = this.onClientError.bind(this);
     this.resetConnection = this.resetConnection.bind(this);
-
   }
 
   handleChange = name => event => {
     this.setState({
-      [name]: event.target.value,
+      [name]: event.target.value
     });
   };
 
@@ -68,14 +105,14 @@ class App extends Component {
   }
 
   submitMessage(event) {
-        event.preventDefault();
-        event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-        try {
-          this.state.room.send(this.state.message);
-        } catch (error) {
-          console.log('Fail to send message:', error);
-        }
+    try {
+      this.state.room.send(this.state.message);
+    } catch (error) {
+      console.log("Fail to send message:", error);
+    }
   }
 
   onClientClose() {
@@ -85,51 +122,71 @@ class App extends Component {
   onClientError(err) {
     console.log("Client error :", err);
     this.state.client.close();
-    this.setState({ error: 'Client error :'+err,  client: null, room: null });
+    this.setState({ error: "Client error :" + err, client: null, room: null });
   }
 
   handleSubmit(event) {
     event.preventDefault();
     event.stopPropagation();
     try {
-      this.setState({client: new Client(this.state.uri), error: null }, () => {
-        this.setState({room: this.state.client.join(this.state.roomName, this.state.jsonOption)}, () => {
-          this.state.room.onStateChange.add(this.updateRoomState);
-          this.state.room.onMessage.add(this.updateReceivedMessage);
-          this.state.client.onClose.add(this.onClientClose);
-          this.state.client.onError.add(this.onClientError);
-        });
+      this.setState({ client: new Client(this.state.uri), error: null }, () => {
+        this.setState(
+          {
+            room: this.state.client.join(
+              this.state.roomName,
+              this.state.jsonOption
+            )
+          },
+          () => {
+            this.state.room.onStateChange.add(this.updateRoomState);
+            this.state.room.onMessage.add(this.updateReceivedMessage);
+            this.state.client.onClose.add(this.onClientClose);
+            this.state.client.onError.add(this.onClientError);
+          }
+        );
       });
     } catch (err) {
-      console.log('Fail to connect', err);
+      console.log("Fail to connect", err);
     }
   }
 
   updateJsonInput = field => update => {
-    this.setState({[field]: update.updated_src})
-  }
+    this.setState({ [field]: update.updated_src });
+  };
 
   resetConnection() {
     this.state.client.close();
     this.setState({
       client: null,
       room: null,
-      roomState: {},
-    })
+      roomState: {}
+    });
   }
 
   render() {
     return (
-      <div className="App-intro">
-        { this.state.error && <ErrorBox message={this.state.error} /> }
+      <div className="client">
+        <div style={styles.clientName}>
+          <p>{this.props.client.name}</p>
+        </div>
+        <div
+          style={styles.closingCross}
+          onClick={this.props.onRemove(this.props.client.id)}
+          onKeyDown={() => {}}
+          role="button"
+          tabIndex="0"
+        >
+          X
+        </div>
+        {this.state.error && <ErrorBox message={this.state.error} />}
         <h3>Server connexion</h3>
-        <div style={{display: 'flex', flexDirection: 'row'}}>
+        <div style={styles.connexionFormContainer}>
           <form style={styles.form}>
             <TextField
               id="uri"
               label="Server URI"
               value={this.state.uri}
-              onChange={this.handleChange('uri')}
+              onChange={this.handleChange("uri")}
               margin="normal"
               style={styles.textField}
             />
@@ -137,18 +194,24 @@ class App extends Component {
               id="room"
               label="Room name:"
               value={this.state.roomName}
-              onChange={this.handleChange('roomName')}
+              onChange={this.handleChange("roomName")}
               margin="normal"
               style={styles.textField}
             />
-            <ReactJson src={this.state.jsonOption}
-              name={'option'}
-              onEdit={this.updateJsonInput('jsonOption')}
-              onDelete={this.updateJsonInput('jsonOption')}
-              onAdd={this.updateJsonInput('jsonOption')}
-              style={{textAlign: 'left', width: 300, minHeight: 100,overflow:'hidden'}}
+            <ReactJson
+              src={this.state.jsonOption}
+              name={"option"}
+              onEdit={this.updateJsonInput("jsonOption")}
+              onDelete={this.updateJsonInput("jsonOption")}
+              onAdd={this.updateJsonInput("jsonOption")}
+              style={styles.jsonConnexionOption}
             />
-            <Button variant="raised" color="primary" style={styles.button} onClick={this.handleSubmit}>
+            <Button
+              variant="raised"
+              color="primary"
+              style={styles.button}
+              onClick={this.handleSubmit}
+            >
               Connect to room
             </Button>
           </form>
@@ -157,31 +220,38 @@ class App extends Component {
             reset={this.resetConnection}
           />
         </div>
-        <div style={{display: 'flex', justifyContent: 'space-around', marginTop: 50, width: '60%'}}>
+        <div style={styles.roomInfoContainer}>
           <div>
             <h3>Room state:</h3>
             <ReactJson
               name={false}
               src={this.state.roomState}
               theme="solarized"
-              style={{textAlign: 'left', width: 400, minHeight: 100}}
+              style={styles.roomState}
             />
           </div>
           <form>
-            <ReactJson src={this.state.message}
-              name={'message'}
-              onEdit={this.updateJsonInput('message')}
-              onDelete={this.updateJsonInput('message')}
-              onAdd={this.updateJsonInput('message')}
-              style={{textAlign: 'left', width: 300, minHeight: 100}}
+            <ReactJson
+              src={this.state.message}
+              name={"message"}
+              onEdit={this.updateJsonInput("message")}
+              onDelete={this.updateJsonInput("message")}
+              onAdd={this.updateJsonInput("message")}
+              style={styles.jsonMessage}
             />
-            <Button variant="raised" color="primary" style={styles.button} onClick={this.submitMessage}>
+            <Button
+              variant="raised"
+              color="primary"
+              style={styles.button}
+              onClick={this.submitMessage}
+            >
               Send message
             </Button>
             <h4>Received Message</h4>
-            <ReactJson src={this.state.receivedMessage}
-              name={'receivedMessage'}
-              style={{textAlign: 'left', width: 300, minHeight: 100}}
+            <ReactJson
+              src={this.state.receivedMessage}
+              name={"receivedMessage"}
+              style={styles.jsonMessage}
               theme="solarized"
             />
           </form>
